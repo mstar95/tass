@@ -38,8 +38,8 @@ function savetxt (data, filename) {
 }
 
 function prepareGooglePatentsQuery (data, filename) {
-    for (i = 0, l = data.length; i * 25 < l; i ++) {
-        chunk = data.slice(i, i + 25);
+    for (i = 0, l = data.length; i * 20 < l; i ++) {
+        chunk = data.slice(i, i + 20);
         const result = chunk.reduce((x, y) => x + ` assignee:(${y})`, "")
         savetxt(result, filename + i)
     }
