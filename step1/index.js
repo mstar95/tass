@@ -3,6 +3,9 @@ const institutes = require('./institute.json');
 const fs = require('fs');
 const path = require('path')
 const XLSX = require('XLSX')
+const preparedInstitutes = require('./preparedInstitutes.json');
+const preparedPrivateUni = require('./preparedPrivateUni.json');
+const publicUni = require('./publicUni.json');
 
 function prepareInstitutes () {
     let result = institutes.filter(i => i != "").map(i => {
@@ -19,7 +22,7 @@ function preparePrivateUni () {
     var sheet = workbook.Sheets[sheetName]
     sheet['!ref'] = 'B4:G386'
 
-    var xlData = XLSX.utils.sheet_to_json(sheet, {header:1});
+    var xlData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
     let result = xlData.map(d => d[1])
     saveData(result, 'preparedPrivateUni')
@@ -30,5 +33,18 @@ function saveData (data, filename) {
     fs.writeFileSync(path.join(__dirname, '', filename + '.json'), serialized, 'utf-8')
 }
 
+function savetxt (data, filename) {
+    fs.writeFileSync(path.join(__dirname + '/out', '', filename + '.txt'), data, 'utf-8')
+}
 
-preparePrivateUni()
+function prepareGooglePatentsQuery (data, filename) {
+    for (i = 0, l = data.length; i * 25 < l; i ++) {
+        chunk = data.slice(i, i + 25);
+        const result = chunk.reduce((x, y) => x + ` assignee:(${y})`, "")
+        savetxt(result, filename + i)
+    }
+}
+
+prepareGooglePatentsQuery(preparedInstitutes, 'institutesQuery')
+prepareGooglePatentsQuery(preparedPrivateUni, 'privateUniQuery')
+prepareGooglePatentsQuery(publicUni, 'publicUniQuery')
