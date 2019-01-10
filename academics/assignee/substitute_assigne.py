@@ -41,8 +41,7 @@ for c,name in enumerate(dirty_names_short):
         similar=similar[1]
         _names_substitutions = dict()
         for name_synonyme in similar:
-            if name != similar:
-                _names_substitutions[name_synonyme] = name
+            _names_substitutions[name_synonyme] = name
         print("%d/%d"%(c,len(dirty_names_short)))
         pprint(_names_substitutions)
         names_substitutions = {**names_substitutions,**_names_substitutions}

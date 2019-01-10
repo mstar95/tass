@@ -6,107 +6,118 @@ import csv
 import distance
 import sys
 
-import unicodedata
+import name_norm
 
-def strip_accents(text):
-    """
-    Strip accents from input String.
 
-    :param text: The input string.
-    :type text: String.
 
-    :returns: The processed String.
-    :rtype: String.
-    """
-    try:
-        text = unicode(text, 'utf-8')
-    except (TypeError, NameError): # unicode is a default on python 3 
-        pass
-    text = unicodedata.normalize('NFD', text)
-    text = text.encode('ascii', 'ignore')
-    text = text.decode("utf-8")
-    return str(text)
+
+def select_most_similar_to_name(surname_name_list, f):
+    print("!!")
+    print(surname_name_list)
+    for n in surname_name_list:
+        ns = f(n).split()
+        print(ns)
+        if len(ns)==2:
+            if ns[0] in polish_names or ns[1] in polish_names:
+                print("#%s->%s"%(pformat(surname_name_list),f(n)))
+                return n
+
+    base = max(surname_name_list, key=lambda x: len(f(x)))
+    return base
+
     
-def inlevenshtein(seq1, seqs, max_dist=0.1):
+def magiclevenshtein(seq1, seqs, max_dist=2, access_fun = lambda x:x):
     for seq2 in seqs:
-        dist1 = distance.levenshtein(seq1, seq2, max_dist=2)
-        if dist1 !=-1:
-            dist2 = distance.nlevenshtein(seq1, seq2, )
-            if dist2 <= max_dist:
-                yield dist2, seq2
+        dist1 = distance.levenshtein(seq1, access_fun(seq2), max_dist=max_dist)
+        if dist1 >= 0:
+            yield dist1, seq2
+
+
+with open("imiona_pl.csv", "r") as f:
+    csv1 = csv.reader(f, delimiter=',', quotechar='\'')
+    next(csv1, None)
+    polish_names  = list(zip(*list(csv1)))[0]
+
+polish_names = set(list(map(name_norm.name_normalise,polish_names)))
+
 
 
 with open('polskie_patenty_z_krotkiej_listy_instytucji_i_ich_wynalazcy.json') as f:
     data = json.load(f)
     
-#pprint(data)
+
 
 from collections import defaultdict
-#d = defaultdict(set)
 companies =  defaultdict(set) #set()
 
 for pat in data:
     for inventr in pat['inventor_harmonized']:
         companies[pat['assignee_alias']].add(inventr['name'])
 
-pprint(companies)
-
 import itertools
 invent_names = sorted(list(itertools.chain.from_iterable(companies.values())))
+#invent_names = invent_names[:1000]
+
+pprint(sorted(list(polish_names)))
+print(select_most_similar_to_name(['DESZCZYNSKI JAROSLAW', 'DESZCZYNSKI JAROSAW'],lambda x:x))
 
 
-trash_subst = "DR INZ INŻ ING DIPL-ING DIPL DR-ING PROF CHEM MD M SC SURGE ENG DR-CHEM".split()
-invent_names_clean = []
+invent_names_clean = dict()
 
 for name in invent_names:
     name_c=name
-    name=strip_accents(name)
-    name=" %s "%name.upper()
-    name=name.replace(",","")
-    name=name.replace("\"","")
-    for sbst in trash_subst:
-        name=name.replace(" "+sbst+" ", " ")
-        name = " ".join(name.strip().split()[:2])
-    invent_names_clean.append(name)
+    name = name_norm.name_normalise(name)    
+    invent_names_clean[name_c]=name
     print(name_c+"->"+name)   
 
 
 
-name_aliases = dict()
-#invent_names_clean = invent_names_clean[:10]
+name_aliases = list()
 
-invent_names_clean_tmp = set(invent_names_clean)
+invent_names_clean_tmp = set(list(invent_names_clean.items()))
+print("@@@2")
+pprint(invent_names_clean_tmp)
 
-#for c,name in enumerate(set(invent_names_clean)):
-invent_names_clean_tmp.discard("")
+#invent_names_clean_tmp.discard("")
 c=0
+print("@@@1")
 while len(invent_names_clean_tmp)>0:
     c=c+1
     name = invent_names_clean_tmp.pop()
-    if True:
-        p = list(zip(*sorted(distance.ilevenshtein(name, invent_names_clean_tmp, max_dist=1))))
-        print("%d/%d %s->%s"%(c,len(invent_names_clean_tmp),name,pformat(p)))
-        if(len(p)==0):
-            name_aliases[name] = name 
-            continue
-        similar = p[1]
-        base = max(similar, key=len)
-        name_aliases[base] = base
-        for s in similar:
-            name_aliases[s] = base
-            invent_names_clean_tmp.discard(s)
-   
-        
-    sys.stdout.flush()
-            
 
+    p1 = list(zip(*sorted(magiclevenshtein(name[1], invent_names_clean_tmp, max_dist=1, access_fun=lambda x:x[1]))))
+    p2 = []#list(zip(*sorted(magiclevenshtein(name[0], invent_names_clean_tmp, max_dist=1, access_fun=lambda x:x[1]))))
+
+    print("%d/%d %s->%s"%(c, len(invent_names_clean_tmp), name, pformat(p1)))
+    print("%d/%d %s->%s"%(c, len(invent_names_clean_tmp), name, pformat(p2)))
+
+    if len(p1)==0 and len(p2)==0 :
+        name_aliases.append(name)
+        continue
+
+    p = set()    
+    if len(p1)==2:
+        p = set(p1[1])
+    if len(p2)==2:
+        p = p | set(p2[1])
+
+    similar = list(p) + [name]
+
+    base = select_most_similar_to_name(similar, lambda x:x[1])
+
+    for s in similar:
+        name_aliases.append((s[0],base[1]))
+        invent_names_clean_tmp.discard(s)
+    sys.stdout.flush()
+       
+name_aliases.sort( key = lambda x:x[0])
 pprint(name_aliases)
+print("@@@#")
 
 with open('inventors_w_aliases.csv',"w") as csvfile:
     writer = csv.writer(csvfile,)
     writer.writerow(("inventor_raw","inventor_alias"))
-    subs = list(name_aliases.items())
-    subs.sort()
+    subs = name_aliases
     writer.writerows(subs)
 
 
