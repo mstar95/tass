@@ -21,10 +21,9 @@ for alias in aliases:
     print(alias, counter)
     res = cr.works(query_author = alias)
     publications[alias] = list(filter(None, [ safeGetTitle(x.get('title')) for x in res['message']['items'] ]))
-    if counter % 5:
-        with open('publikacjeDir/pub' + str(counter / 5) + '.json',"w") as jsonfile:
-            json.dump(publications, jsonfile)
-    
-    publications = dict()
+    if counter % 1000 == 0:
+        # with open('publikacjeDir/pub' + str(counter / 1000) + '.json',"w") as jsonfile:
+        #     json.dump(publications, jsonfile)
+        publications = dict()
 
 
