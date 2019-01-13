@@ -5,11 +5,9 @@ from pprint import pprint,pformat
 import csv
 import distance
 import sys
-
+from collections import defaultdict
 import name_norm
-
-
-
+import itertools
 
 def select_most_similar_to_name(surname_name_list, f):
     print("!!")
@@ -38,7 +36,7 @@ with open("imiona_pl.csv", "r") as f:
     next(csv1, None)
     polish_names  = list(zip(*list(csv1)))[0]
 
-polish_names = set(list(map(name_norm.name_normalise,polish_names)))
+polish_names = name_norm.get_imiona_normalised()
 
 
 
@@ -47,14 +45,14 @@ with open('polskie_patenty_z_krotkiej_listy_instytucji_i_ich_wynalazcy.json') as
     
 
 
-from collections import defaultdict
+
 companies =  defaultdict(set) #set()
 
 for pat in data:
     for inventr in pat['inventor_harmonized']:
         companies[pat['assignee_alias']].add(inventr['name'])
 
-import itertools
+
 invent_names = sorted(list(itertools.chain.from_iterable(companies.values())))
 #invent_names = invent_names[:1000]
 
@@ -65,9 +63,9 @@ print(select_most_similar_to_name(['DESZCZYNSKI JAROSLAW', 'DESZCZYNSKI JAROSAW'
 invent_names_clean = dict()
 
 for name in invent_names:
-    name_c=name
-    name = name_norm.name_normalise(name)    
-    invent_names_clean[name_c]=name
+    name_c = name
+    name = name_norm.inventor_name_normalise(name)
+    invent_names_clean[name_c] = name
     print(name_c+"->"+name)   
 
 
