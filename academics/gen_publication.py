@@ -15,15 +15,17 @@ aliases.sort()
 
 cr = Crossref(mailto = "jedr.ka@gmail.com")
 publications = dict()
-counter = 0
-for alias in aliases:
+counter = 8000
+for alias in aliases[counter:]:
     counter = counter + 1
     print(alias, counter)
     res = cr.works(query_author = alias)
     publications[alias] = list(filter(None, [ safeGetTitle(x.get('title')) for x in res['message']['items'] ]))
     if counter % 1000 == 0:
-        # with open('publikacjeDir/pub' + str(counter / 1000) + '.json',"w") as jsonfile:
-        #     json.dump(publications, jsonfile)
+        with open('publikacjeDir/pub' + str(counter / 1000) + '.json',"w") as jsonfile:
+            json.dump(publications, jsonfile)
         publications = dict()
 
+with open('publikacjeDir/pub' + str(9) + '.json',"w") as jsonfile:
+            json.dump(publications, jsonfile)
 
