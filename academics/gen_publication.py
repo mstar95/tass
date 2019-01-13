@@ -100,7 +100,7 @@ def save_all_this_sit():
     """
     generuje csv, gdzie w kazdrym rzedzie jest imie, imie wspoltworcy, i liczba mowiaca o ilosci wspolnych punlikacji
     """
-    aliases = load_alias_list():
+    aliases = load_alias_list()
     net = dict();
     for c,i in enumerate(aliases):
         net[i] = getManCoworkers(i,None)
@@ -126,18 +126,19 @@ def parallel_task(data):
 
 
 def download_all_this_things_in_parallalale():
-    aliases = load_alias_list():
+    aliases = load_alias_list()
     pool = ThreadPool(2) 
     pool.map(parallel_task,  [[id,alias,cr] for id, alias in enumerate(aliases)])
     
 def download_all_this_things():
-    load_alias_list():
+    load_alias_list()
     for i in [(id,alias,cr) for id,alias in enumerate(aliases)]:
         print(parallel_task(i))
     
     
 cr = Crossref(mailto = "jedr.ka@gmail.com")
-save_all_this_sit()
+#save_all_this_sit()
+download_all_this_things_in_parallalale()
 exit(0)
     
     
