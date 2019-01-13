@@ -68,7 +68,7 @@ def getManCoworkers(name_alias, cr):
             if 'given' in aut:
                 aut_name = " ".join([aut_name,aut['given']])
             if 'family' not in aut or 'given' not in aut:
-                print(aut)
+                #print(aut)
                 aut_name = " ".join(aut_name.split()[::-1])
             
             if aut_name != "":
@@ -104,8 +104,8 @@ def save_all_this_sit():
     net = dict();
     for c,i in enumerate(aliases):
         net[i] = getManCoworkers(i,None)
-        if c > 100:
-            break
+#        if c > 100:
+#            break
     
     with open('publication_coworking.csv',"w") as csvfile:
         writer = csv.writer(csvfile,)
@@ -137,8 +137,8 @@ def download_all_this_things():
     
     
 cr = Crossref(mailto = "jedr.ka@gmail.com")
-#save_all_this_sit()
-download_all_this_things_in_parallalale()
+save_all_this_sit()
+#download_all_this_things_in_parallalale()
 exit(0)
     
     
