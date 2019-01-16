@@ -56,10 +56,6 @@ for pat in data:
 invent_names = sorted(list(itertools.chain.from_iterable(companies.values())))
 #invent_names = invent_names[:1000]
 
-pprint(sorted(list(polish_names)))
-print(select_most_similar_to_name(['DESZCZYNSKI JAROSLAW', 'DESZCZYNSKI JAROSAW'],lambda x:x))
-
-
 invent_names_clean = dict()
 
 for name in invent_names:
