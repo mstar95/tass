@@ -8,10 +8,10 @@ with open('roznice_w_patentach_wszystkie.csv',"r") as csvfile:
 
 averages = [float(x[3]) for x in data]
 averages.sort()
-print(max(averages))
+
 percentiles = [np.percentile(averages, x) for x in range(0,101)] 
 
-print(percentiles)
+print(percentiles[:-1])
 
 # lists = sorted(res.items()) # sorted by key, return a list of tuples
 
@@ -20,5 +20,7 @@ print(percentiles)
 # print(max(x))
 # print(max(y))
 plt.plot([x for x in range(0,101)] , percentiles)
-
-plt.savefig('roznice.png')
+plt.yscale('log') 
+plt.xlabel('percentyle')
+plt.ylabel('liczba patentow / liczba patentow wspolpracownikow')
+plt.savefig('roznice_log.png')
