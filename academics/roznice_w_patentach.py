@@ -33,15 +33,20 @@ for alias in aliases:
             continue
         res = list(filter(lambda p: p[0] == name, patents))
         if not res:
-            continue
-        value = int(coworker[2]) * int(res[0][1])
+            value = 0
+        else:
+            value = int(coworker[2]) * int(res[0][1])
         finalValue = finalValue + value
         coworkersCounter = coworkersCounter + int(coworker[2])
     if coworkersCounter != 0:
-        result.append((alias, patentNr, finalValue / coworkersCounter))
+        coworkersPatents = finalValue / coworkersCounter
+        average = 0
+        if coworkersPatents != 0.0:
+            average = int(patentNr) / coworkersPatents
+        result.append((alias, patentNr, coworkersPatents, average))
         
-with open('roznice_w_patentach.csv',"w") as csvfile:
+with open('roznice_w_patentach_wszystkie.csv',"w") as csvfile:
     writer = csv.writer(csvfile,)
-    writer.writerow(("inventor","patents","coworkers_patents"))
+    writer.writerow(("inventor","patents","coworkers_patents", "patents/coworkers_patents"))
     subs = result
     writer.writerows(subs)
