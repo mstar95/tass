@@ -40,7 +40,7 @@ for alias in aliases:
         coworkersCounter = coworkersCounter + int(coworker[2])
     if coworkersCounter != 0:
         coworkersPatents = finalValue / coworkersCounter
-        average = 0
+        average = patentNr
         if coworkersPatents != 0.0:
             average = int(patentNr) / coworkersPatents
         result.append((alias, patentNr, coworkersPatents, average))
